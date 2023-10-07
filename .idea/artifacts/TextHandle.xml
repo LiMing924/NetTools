@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="TextHandle">
+    <output-path>F:/Desktop/Jar文件/UDP-Data-Transceiver-Protocol</output-path>
+    <root id="archive" name="TextHandle.jar">
+      <element id="module-output" name="NetTools" />
+    </root>
+  </artifact>
+</component>

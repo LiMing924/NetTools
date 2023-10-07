@@ -1,0 +1,14 @@
+目的:实现TCP/UDP网络传输
+    总体分为TCP和UDP两个方向，后续考虑匹配其他协议。C/S架构
+功能:
+    TCP:
+        TCP服务端
+            TCPServerSocket
+        TCP客户端
+            TCPClientSocket
+    UDP:
+        UDP服务端
+
+        UDP客户端
+    队列:
+    监听:
