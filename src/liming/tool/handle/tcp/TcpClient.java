@@ -1,7 +1,7 @@
 package liming.tool.handle.tcp;
 
-import liming.tool.handle.receive.RootReceiveMap;
-import liming.tool.handle.receive.Client;
+import liming.tool.handle.root.RootReceiveMap;
+import liming.tool.handle.root.base.Client;
 
 public interface TcpClient extends Client,TransformTcp {
     @Override

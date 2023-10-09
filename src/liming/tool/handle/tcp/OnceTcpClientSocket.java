@@ -1,6 +1,6 @@
 package liming.tool.handle.tcp;
 
-import liming.tool.handle.receive.DataCommunicationException;
+import liming.tool.handle.root.error.DataCommunicationException;
 
 import java.net.InetAddress;
 

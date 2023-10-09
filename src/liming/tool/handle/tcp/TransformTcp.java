@@ -1,7 +1,7 @@
 package liming.tool.handle.tcp;
 
-import liming.tool.handle.receive.RootReceiveMap;
-import liming.tool.handle.receive.Transform;
+import liming.tool.handle.root.RootReceiveMap;
+import liming.tool.handle.root.base.Transform;
 
 public interface TransformTcp extends Transform {
     @Override
