@@ -99,17 +99,11 @@ public abstract class TimeOut<T> {
 
     /**
      * 处理超时数据
-     * 
-     * @param key
-     * @param value
      */
     public abstract void onTimeout(String key, T value);
 
     /**
      * 处理超限数据
-     * 
-     * @param key
-     * @param value
      */
     public abstract void onRestrict(String key, T value);
 }

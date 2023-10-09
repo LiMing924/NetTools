@@ -100,7 +100,7 @@ public class ListPool<T> {
      * @return 返回LinkPool对象本身，支持链式调用
      */
     public ListPool<T> putWait(T object, long millisecond) {
-        long time = millisecond, endTime = System.currentTimeMillis() + millisecond;
+        long time, endTime = System.currentTimeMillis() + millisecond;
         lock.lock();
         boolean get = false;
         try {
@@ -165,7 +165,7 @@ public class ListPool<T> {
      * @return 队列中的第一个对象
      */
     public T getWait(long millisecond) {
-        long time = millisecond, endTime = System.currentTimeMillis() + millisecond;
+        long time, endTime = System.currentTimeMillis() + millisecond;
 
         lock.lock();
         if (!RUN&&list.isEmpty()){

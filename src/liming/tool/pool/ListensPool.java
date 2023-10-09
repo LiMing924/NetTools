@@ -1,6 +1,5 @@
 package liming.tool.pool;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,13 +20,8 @@ public abstract class ListensPool<T> extends Listen<T>{
             StackTraceElement caller = stackTrace[2];
             path = caller.getClassName() + " " + caller.getMethodName() + " at " + caller.getLineNumber();
         }
-
-        try {
-            listPool.add(this);
-        }catch (RuntimeException e){
-            throw e;
-        }
-        this.outTime=outTime;
+        listPool.add(this);
+        this.outTime = outTime;
         executorService=Executors.newScheduledThreadPool(size);
         for(int i=0;i<size;i++){
             executorService.scheduleAtFixedRate(this::listen,0,Math.max(milliseconds,1),TimeUnit.MILLISECONDS);
@@ -52,5 +46,6 @@ public abstract class ListensPool<T> extends Listen<T>{
     }
 
     @Override
-    public void onStop(List<T> list){return;}
+    public void onStop(List<T> list) {
+    }
 }

@@ -20,11 +20,7 @@ public abstract class ListenPool<T> extends Listen<T>{
             throw new RuntimeException(listPool+" Listening already exists 。"+listPool.listen);
         }
         this.listPool = listPool;
-        try {
-            listPool.add(this);
-        }catch (RuntimeException e){
-            throw e;
-        }
+        listPool.add(this);
         executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(this::listen, 0, Math.max(1,milliseconds), TimeUnit.MILLISECONDS);
         this.outTime = outTime;

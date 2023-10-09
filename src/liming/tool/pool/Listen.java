@@ -35,10 +35,6 @@ abstract class Listen<T> {
         } while (Run&&!listPool.isEmpty());
     }
 
-    public void onWork(T t) {
-        return;
-    }
-
     public abstract void handle(T t) throws Exception;
 
     public abstract void onStop(List<T> list);
