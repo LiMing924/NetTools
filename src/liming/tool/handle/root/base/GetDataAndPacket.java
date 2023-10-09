@@ -1,4 +1,4 @@
-package liming.tool.handle.receive;
+package liming.tool.handle.root.base;
 
 public interface GetDataAndPacket{
     String LOG_STRING="LOG: ";

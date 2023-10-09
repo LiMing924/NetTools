@@ -1,11 +1,14 @@
-package liming.tool.handle.receive;
+package liming.tool.handle.root.base;
+
+import liming.tool.handle.root.RootReceiveMap;
 
 /**
  * 定义客户端方法接口
  */
-public interface Client extends BaseWork{
+public interface Client extends BaseWork {
     /**
      * 执行客户端的处理逻辑
+     *
      * @param respond 来自服务器的响应
      * @return 是否在结束后保留连接
      */

@@ -1,4 +1,4 @@
-package liming.tool.handle.receive;
+package liming.tool.handle.root.error;
 
 /**
  * 定义自己的异常信息
