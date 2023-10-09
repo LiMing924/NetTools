@@ -7,6 +7,7 @@ import liming.tool.pool.TimePool.DataObject;
 
 /**
  * 区分超时数据与超限数据，分别处理
+ * 自动将超限数据转移，无需手动调配
  */
 public abstract class TimeOut<T> {
     private static ListPool<Object> slog= Pools.getListPool("System.slog");
@@ -44,6 +45,19 @@ public abstract class TimeOut<T> {
             }
         }
         return pool1.get(ID).getValue();
+    }
+
+    public void setTime(long time, float ratio) {
+        timeOut1 = (long) Math.ceil(time * ratio);
+        if (timeOut1 < 200)
+            timeOut1 = 200;
+        if (timeOut1 > 800 && timeOut1 > time / 4)
+            timeOut1 = time / 4;
+        timeOut2 = (long) Math.ceil(time / ratio);
+        if (timeOut2 > time - timeOut1)
+            timeOut2 = time - timeOut1;
+        pool1.setTimeOut(timeOut1);
+        pool2.setTimeOut(timeOut2);
     }
 
     public synchronized DataObject<T> get(String ID) {

@@ -13,10 +13,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * 在放入数据时给追加超时时间
  */
 public abstract class TimePool<T> {
+    public static final long OVER_TIME = 4_000;
     private Map<String, DataObject<T>> temp = new HashMap<>();
     private PriorityQueue<DataObject<T>> sortedData;
     private ScheduledExecutorService executorService;
-    private long timeOut;// 4000
+    private long timeOut;
     private ListPool<PoolObject<T>> pool;
     private Lock lock;
 
@@ -41,7 +42,6 @@ public abstract class TimePool<T> {
         }finally {
             lock.unlock();
         }
-
     }
 
     public T flush(String ID) {
@@ -86,35 +86,16 @@ public abstract class TimePool<T> {
         return temp.containsKey(ID);
     }
 
-    /**
-     * examination 检查 检查首个数据是否超时，若超时则调用提醒机制
-     */
-    private synchronized void examination() {
-//        long currentTime = System.currentTimeMillis();
-//        temp.forEach((key, dataObject) -> {
-//            if (dataObject.time + timeOut + dataObject.addtime < currentTime) {
-//                pool.put(new PoolObject<>(key, temp.remove(key)));
-//            }
-//        });
-        while (!sortedData.isEmpty()) {
-            long currentTime = System.currentTimeMillis();
-            DataObject<T> dataObject = sortedData.peek();
-            long endTime=dataObject.time + timeOut + dataObject.addtime;
-            if (endTime < currentTime) {
-                pool.put(new PoolObject<>(dataObject.key, temp.remove(dataObject.key)));
-                sortedData.poll(); // 从排序集合中移除已处理的数据
-            } else {
-                long sTime=endTime-currentTime;
-                if(sTime>=timeOut)break;
-                try {
-                    Thread.sleep(Math.max(endTime-currentTime,1));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-
-            }
-        }
+    public TimePool(String name, long timeOut, int size) {
+        lock = new ReentrantLock();
+        pool = Pools.getListPool(name, size);
+        this.timeOut = timeOut;
+        sortedData = new PriorityQueue<>(Comparator.comparingLong(d -> (d.time + d.addtime + timeOut)));
+        executorService = Executors.newScheduledThreadPool(2);
+        executorService.scheduleAtFixedRate(this::examination, 0, 1, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(this::push, 0, 1, TimeUnit.MILLISECONDS);
     }
+
 
     private void push() {
         do {
@@ -131,6 +112,10 @@ public abstract class TimePool<T> {
             executorService.shutdown();
         }
         temp.clear();
+    }
+
+    public TimePool(String name, int size) {
+        this(name, OVER_TIME, size);
     }
 
     private static class PoolObject<T> {
@@ -187,14 +172,52 @@ public abstract class TimePool<T> {
                     '}';
         }
     }
-    public TimePool(String name,long timeOut, int size) {
-        lock = new ReentrantLock();
-        pool = Pools.getListPool(name,size);
-        this.timeOut = timeOut;
-        sortedData = new PriorityQueue<>(Comparator.comparingLong(d -> (d.time + d.addtime+timeOut)));
-        executorService = Executors.newScheduledThreadPool(2);
-        executorService.scheduleAtFixedRate(this::examination, 0, timeOut, TimeUnit.MILLISECONDS);
-        executorService.scheduleAtFixedRate(this::push, 0, timeOut, TimeUnit.MILLISECONDS);
+
+    public static void main(String[] args) throws InterruptedException {
+        TimePool<Object> timePool = new TimePool<Object>("test1", 4000, 2000) {
+            @Override
+            public void handle(String key, DataObject<Object> value) {
+                System.out.println(new Date() + " " + key + " " + value.getValue());
+            }
+        };
+
+        timePool.put("1", new Date(), 0);
+        Thread.sleep(1000);
+        timePool.put("2", new Date(), 0);
+        Thread.sleep(1000);
+        timePool.put("3", new Date(), 0);
+        Thread.sleep(1000);
+        timePool.flush("1");
+    }
+
+    /**
+     * examination 检查 检查首个数据是否超时，若超时则调用提醒机制
+     */
+    private synchronized void examination() {
+//        long currentTime = System.currentTimeMillis();
+//        temp.forEach((key, dataObject) -> {
+//            if (dataObject.time + timeOut + dataObject.addtime < currentTime) {
+//                pool.put(new PoolObject<>(key, temp.remove(key)));
+//            }
+//        });
+        while (!sortedData.isEmpty()) {
+            long currentTime = System.currentTimeMillis();
+            DataObject<T> dataObject = sortedData.peek();
+            long endTime=dataObject.time + timeOut + dataObject.addtime;
+            if (endTime < currentTime) {
+                pool.put(new PoolObject<>(dataObject.key, temp.remove(dataObject.key)));
+                sortedData.poll(); // 从排序集合中移除已处理的数据
+            } else {
+                long sTime=endTime-currentTime;
+                try {
+                    synchronized (this) {
+                        wait(Math.max(Math.min(sTime, timeOut), 1));
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
     /**
@@ -205,19 +228,10 @@ public abstract class TimePool<T> {
      */
     public abstract void handle(String key, DataObject<T> value);
 
-    public static void main(String[] args) throws InterruptedException {
-        TimePool<Object> timePool=new TimePool<Object>("test1",4000,2000) {
-            @Override
-            public void handle(String key, DataObject<Object> value) {
-                System.out.println(key);
-            }
-        };
-        timePool.put("1","1",2000);
-        Thread.sleep(2000);
-        timePool.put("2","2",2000);
-        Thread.sleep(1000);
-        timePool.put("3","3",2000);
-        Thread.sleep(1000);
-        timePool.flush("1");
+    public void setTimeOut(long time) {
+        timeOut = time;
+        synchronized (this) {
+            notifyAll();
+        }
     }
 }

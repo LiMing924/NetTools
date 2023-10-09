@@ -2,7 +2,6 @@ package liming.tool.pool;
 
 import liming.tool.handle.FileRW;
 
-import java.io.IOException;
 import java.util.List;
 
 abstract class Listen<T> {
@@ -36,15 +35,25 @@ abstract class Listen<T> {
         } while (Run&&!listPool.isEmpty());
     }
 
-    public void onWork(T t){return;}
+    public void onWork(T t) {
+        return;
+    }
 
     public abstract void handle(T t) throws Exception;
 
     public abstract void onStop(List<T> list);
-    public String getPath(){
+
+    public String getPath() {
         return path;
     }
-    public String getName(){return name;}
+
+    public String getName() {
+        return name;
+    }
+
+    public ListPool<T> getListPool() {
+        return listPool;
+    }
 
     public abstract void close();
 }
